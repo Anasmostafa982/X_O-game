@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>x_o</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 10px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f0f0f0;
+      border: 2px solid #333;
+      cursor: pointer;
+    }
+    .cell.taken {
+      pointer-events: none;
+      background-color: #ddd;
+    }
+    .message {
+      margin: 20px;
+      font-size: 1.5rem;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Welcome to X_O game</h1>
+<div class="board" id="board"></div>
+<div class="message" id="message"></div>
+<button id="resetButton" style="display: none;">Play Again</button>
+
+<script>
+  const board = document.getElementById('board');
+  const message = document.getElementById('message');
+  const resetButton = document.getElementById('resetButton');
+
+  let cells = Array(9).fill(null); // Tracks cell values
+  let currentPlayer = 'X'; // Tracks current player
+  let gameActive = true;
+
+  // Initialize the board
+  function initializeBoard() {
+    board.innerHTML = ''; // Clear the board
+    cells.fill(null); // Reset cell values
+    currentPlayer = 'X'; // Reset to X
+    gameActive = true;
+    message.textContent = `Current Player: ${currentPlayer}`;
+    resetButton.style.display = 'none';
+
+    // Create cells
+    for (let i = 0; i < 9; i++) {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.dataset.index = i;
+      cell.addEventListener('click', handleCellClick);
+      board.appendChild(cell);
+    }
+  }
+
+  // Handle cell clicks
+  function handleCellClick(event) {
+    const index = event.target.dataset.index;
+
+    if (cells[index] !== null || !gameActive) return;
+
+    cells[index] = currentPlayer;
+    event.target.textContent = currentPlayer;
+    event.target.classList.add('taken');
+
+    if (checkWinner()) {
+      message.textContent = `${currentPlayer} is the winner!`;
+      gameActive = false;
+      resetButton.style.display = 'block';
+      return;
+    }
+
+    if (cells.every(cell => cell !== null)) {
+      message.textContent = 'It\'s a draw!';
+      gameActive = false;
+      resetButton.style.display = 'block';
+      return;
+    }
+
+    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    message.textContent = `Current Player: ${currentPlayer}`;
+  }
+
+  // Check for a winner
+  function checkWinner() {
+    const winningCombinations = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+      [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+      [0, 4, 8], [2, 4, 6]             // Diagonals
+    ];
+
+    return winningCombinations.some(combination => {
+      const [a, b, c] = combination;
+      return cells[a] !== null && cells[a] === cells[b] && cells[b] === cells[c];
+    });
+  }
+
+  // Reset the game
+  resetButton.addEventListener('click', initializeBoard);
+
+  // Initialize the game
+  initializeBoard();
+</script>
+
+</body>
+</html>
